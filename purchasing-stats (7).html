@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PureStats v5</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+/* ─── THEME VARIABLES ─────────────────────────────────────── */
+:root{
+  --bg:#0b0c0f;--sur:#12131a;--card:#181921;--bdr:#22232f;--bdr2:#32334a;
+  --acc:#b8ff3c;--adm:#7aaa22;--blu:#3ceaff;--org:#ffb03c;--red:#ff4a6e;
+  --prp:#c87dff;--ylw:#ffe03c;--txt:#e0e1ee;--mut:#52536a;
+  --mono:'IBM Plex Mono',monospace;--dis:'Syne',sans-serif;
+  --glow-acc:0 0 20px rgba(184,255,60,.35);
+  --glow-red:0 0 20px rgba(255,74,110,.35);
+  --glow-blu:0 0 20px rgba(60,234,255,.35);
+}
+/* ⚡ Cyber — deep ocean neon */
+body.theme-cyber{
+  --bg:#00040f;--sur:#010814;--card:#010d1e;--bdr:#0a2040;--bdr2:#0f3060;
+  --acc:#00f0ff;--adm:#00a0aa;--blu:#7b2fff;--org:#ff8c00;--red:#ff1a4a;
+  --prp:#ff00d4;--txt:#c8f4ff;--mut:#2a5070;
+}
+/* 🔥 Ember — molten orange */
+body.theme-ember{
+  --bg:#0f0800;--sur:#180f00;--card:#1f1200;--bdr:#3a2000;--bdr2:#5a3500;
+  --acc:#ff6a00;--adm:#cc4400;--blu:#ffd700;--org:#ff3a00;--red:#ff0040;
+  --prp:#ff00aa;--txt:#ffe8cc;--mut:#5a3020;
+}
+/* 👻 Ghost — clean light */
+body.theme-ghost{
+  --bg:#f0f0f5;--sur:#ffffff;--card:#fafafa;--bdr:#dddde8;--bdr2:#c8c8d8;
+  --acc:#2200ff;--adm:#1100aa;--blu:#0088ff;--org:#ff6600;--red:#ee1144;
+  --prp:#8800ff;--txt:#111118;--mut:#7777aa;
+}
+/* 💊 Matrix — terminal green */
+body.theme-matrix{
+  --bg:#000800;--sur:#000f00;--card:#001200;--bdr:#003300;--bdr2:#005500;
+  --acc:#00ff41;--adm:#00bb30;--blu:#00ffaa;--org:#aaff00;--red:#ff2200;
+  --prp:#00ff41;--txt:#aaffaa;--mut:#1a4a1a;
+}
+/* 🌆 Synthwave — purple-pink neon city */
+body.theme-synth{
+  --bg:#0d0015;--sur:#130020;--card:#180028;--bdr:#2d0055;--bdr2:#4a0088;
+  --acc:#ff2dff;--adm:#bb00bb;--blu:#2df5ff;--org:#ffaa00;--red:#ff2255;
+  --prp:#bf5fff;--txt:#f0d0ff;--mut:#5a2a7a;
+}
+/* 🌌 Aurora — shifting polar lights */
+body.theme-aurora{
+  --bg:#020818;--sur:#040f22;--card:#060f28;--bdr:#0a1f40;--bdr2:#0f3060;
+  --acc:#00ffcc;--adm:#00aa88;--blu:#7b5fff;--org:#ffdd00;--red:#ff4466;
+  --prp:#aa44ff;--txt:#d0eeff;--mut:#2a4060;
+}
+/* 🔩 Steel — industrial chrome */
+body.theme-steel{
+  --bg:#141618;--sur:#1c1f22;--card:#22262a;--bdr:#333840;--bdr2:#445060;
+  --acc:#78b4ff;--adm:#5588cc;--blu:#aaddff;--org:#ffcc44;--red:#ff5555;
+  --prp:#cc88ff;--txt:#cdd5e0;--mut:#556070;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--mono);min-height:100vh;padding-bottom:80px;transition:background .5s,color .5s}
+
+/* ─── ANIMATED BACKGROUNDS ────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(184,255,60,.04) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 80% at 80% 90%,rgba(60,234,255,.04) 0%,transparent 60%);
+  animation:bgpulse 8s ease-in-out infinite alternate;
+}
+@keyframes bgpulse{0%{opacity:.5}100%{opacity:1}}
+body.theme-cyber::before{background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(0,240,255,.07) 0%,transparent 55%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(123,47,255,.07) 0%,transparent 55%);animation:bgpulse 5s ease-in-out infinite alternate}
+body.theme-ember::before{background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(255,106,0,.08) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(255,215,0,.05) 0%,transparent 60%);animation:emberpulse 4s ease-in-out infinite alternate}
+body.theme-matrix::before{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(0,255,65,.05) 0%,transparent 70%);animation:bgpulse 3s ease-in-out infinite alternate}
+body.theme-synth::before{
+  background:radial-gradient(ellipse 70% 50% at 10% 20%,rgba(255,45,255,.1) 0%,transparent 55%),
+             radial-gradient(ellipse 70% 50% at 90% 80%,rgba(45,245,255,.1) 0%,transparent 55%),
+             radial-gradient(ellipse 50% 40% at 50% 50%,rgba(191,95,255,.06) 0%,transparent 60%);
+  animation:synthpulse 6s ease-in-out infinite alternate;
+}
+@keyframes synthpulse{
+  0%{background-position:0% 0%,100% 100%,50% 50%}
+  50%{background-position:10% 20%,90% 80%,55% 45%}
+  100%{background-position:20% 10%,80% 90%,45% 55%}
+}
+body.theme-aurora::before{
+  background:radial-gradient(ellipse 120% 40% at 0% 60%,rgba(0,255,204,.07) 0%,transparent 50%),
+             radial-gradient(ellipse 120% 40% at 100% 40%,rgba(123,95,255,.07) 0%,transparent 50%),
+             radial-gradient(ellipse 80% 30% at 50% 80%,rgba(255,221,0,.04) 0%,transparent 50%);
+  animation:aurorapulse 10s ease-in-out infinite alternate;
+}
+@keyframes aurorapulse{
+  0%{opacity:.6;transform:scaleX(1)}
+  50%{opacity:1;transform:scaleX(1.05)}
+  100%{opacity:.7;transform:scaleX(.97)}
+}
+@keyframes emberpulse{
+  0%{opacity:.6;background-position:0% 0%}
+  100%{opacity:1;background-position:5% 5%}
+}
+body.theme-steel::before{
+  background:linear-gradient(135deg,rgba(120,180,255,.03) 0%,transparent 50%,rgba(204,136,255,.02) 100%);
+  animation:none;
+}
+body>*{position:relative;z-index:1}
+
+/* Scanlines for cyber/matrix/synth */
+body.theme-cyber::after,body.theme-matrix::after,body.theme-synth::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+  animation:scan 8s linear infinite;
+}
+/* Synthwave horizon line */
+body.theme-synth::before{background:
+  radial-gradient(ellipse 70% 50% at 10% 20%,rgba(255,45,255,.1) 0%,transparent 55%),
+  radial-gradient(ellipse 70% 50% at 90% 80%,rgba(45,245,255,.1) 0%,transparent 55%),
+  linear-gradient(to bottom,transparent 70%,rgba(255,45,255,.06) 85%,rgba(45,245,255,.04) 100%);
+}
+/* Steel noise texture */
+body.theme-steel::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.4;
+}
+@keyframes scan{0%{background-position:0 0}100%{background-position:0 80px}}
+
+/* ─── HEADER ──────────────────────────────────────────────── */
+.hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:16px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hdr-dot{width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 14px var(--acc);flex-shrink:0;animation:dotpulse 2s ease-in-out infinite}
+@keyframes dotpulse{0%,100%{box-shadow:0 0 8px var(--acc)}50%{box-shadow:0 0 20px var(--acc),0 0 40px var(--acc)}}
+.hdr h1{font-family:var(--dis);font-size:1.25rem;font-weight:900;letter-spacing:-.02em}
+.hdr h1 span{color:var(--acc)}
+.hdr-sub{font-size:.58rem;color:var(--mut);letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* Theme switcher */
+.theme-btn{font-size:.62rem;padding:5px 10px;border-radius:20px;border:1px solid var(--bdr2);background:var(--card);color:var(--mut);cursor:pointer;transition:all .2s;font-family:var(--mono)}
+.theme-btn:hover,.theme-btn.active{border-color:var(--acc);color:var(--acc)}
+
+/* ─── UNIFIED FILE MANAGER ────────────────────────────────── */
+.file-manager{background:var(--sur);border-bottom:1px solid var(--bdr);padding:10px 28px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-x:auto}
+.fm-label{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);white-space:nowrap;margin-right:4px}
+.fm-chip{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:.65rem;padding:5px 10px;border-radius:8px;border:1px dashed var(--bdr2);background:var(--card);color:var(--mut);cursor:pointer;transition:all .2s;overflow:hidden;white-space:nowrap}
+.fm-chip:hover{border-color:var(--acc)}
+.fm-chip.loaded{border-style:solid;border-color:var(--acc);color:var(--adm);background:#121a08}
+.fm-chip.loaded .fm-dot{background:var(--acc);box-shadow:0 0 6px var(--acc)}
+.fm-chip input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.fm-dot{width:5px;height:5px;border-radius:50%;background:var(--bdr2);flex-shrink:0;transition:all .2s}
+.fm-name{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+
+/* ─── TABS ────────────────────────────────────────────────── */
+.tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--sur);padding:0 28px;overflow-x:auto}
+.tab{font-family:var(--mono);font-size:.65rem;letter-spacing:.07em;text-transform:uppercase;padding:11px 14px;cursor:pointer;border:none;background:none;color:var(--mut);border-bottom:2px solid transparent;transition:color .2s,border-color .2s;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:var(--txt)}.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+
+/* ─── PANELS / LAYOUT ─────────────────────────────────────── */
+.panel{display:none}.panel.active{display:block}
+.wrap{max-width:1060px;margin:0 auto;padding:24px 18px}
+.slabel{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+.div{height:1px;background:var(--bdr);margin:20px 0}
+.sec-hdr{font-family:var(--dis);font-size:.9rem;font-weight:800;margin:18px 0 10px}
+.empty{text-align:center;padding:36px 16px;color:var(--mut);font-size:.76rem}
+.empty div{font-family:var(--dis);font-size:1.3rem;margin-bottom:6px;opacity:.2}
+
+/* ─── GRID LAYOUTS ────────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ─── CARDS ───────────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:16px}
+
+/* Stat cards */
+.sc{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .3s}
+.sc.on{border-color:var(--bdr2)}
+.sc[data-k=week].on::before{background:var(--org)}
+.sc[data-k=good].on::before{background:var(--acc)}
+.sc[data-k=all].on::before{background:var(--blu)}
+.sc[data-k=ret].on::before{background:var(--red)}
+.sc-lbl{font-size:.55rem;letter-spacing:.17em;text-transform:uppercase;color:var(--mut);margin-bottom:4px}
+.sc-ttl{font-family:var(--dis);font-size:.82rem;font-weight:800;margin-bottom:10px}
+.sc-val{font-family:var(--dis);font-size:1.8rem;font-weight:900;letter-spacing:-.03em;color:var(--mut);transition:color .4s}
+.sc[data-k=week].on .sc-val{color:var(--org)}
+.sc[data-k=good].on .sc-val{color:var(--acc)}
+.sc[data-k=all].on .sc-val{color:var(--blu)}
+.sc[data-k=ret].on .sc-val{color:var(--red)}
+.sc-cnt{font-size:.61rem;color:var(--mut);margin-top:4px;min-height:1em}
+.sc-dsc{font-size:.58rem;color:var(--mut);margin-top:8px;border-top:1px solid var(--bdr);padding-top:7px;line-height:1.5;opacity:.65}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.sgrid{grid-template-columns:1fr}}
+
+/* ─── INPUTS ──────────────────────────────────────────────── */
+.inp{background:var(--sur);border:1px solid var(--bdr2);border-radius:7px;color:var(--txt);font-family:var(--mono);font-size:.75rem;padding:7px 10px;outline:none;width:100%;transition:border-color .2s}
+.inp:focus{border-color:var(--acc)}
+select.inp option{background:var(--sur)}
+.drow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:11px 15px;margin-bottom:18px}
+.drow label{font-size:.62rem;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+
+/* ─── BUTTONS ─────────────────────────────────────────────── */
+.btn{display:block;width:100%;border:none;border-radius:10px;font-family:var(--dis);font-size:.9rem;font-weight:900;letter-spacing:.04em;padding:12px;cursor:pointer;margin-bottom:24px;transition:opacity .15s,transform .1s,box-shadow .2s}
+.btn:hover{opacity:.88;box-shadow:var(--glow-acc)}
+.btn:active{transform:scale(.99)}
+.btn-grn{background:var(--acc);color:#0b0c0f}
+.btn-prp{background:var(--prp);color:#0b0c0f}
+.btn-blu{background:var(--blu);color:#0b0c0f}
+.btn-org{background:var(--org);color:#0b0c0f}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{display:inline-block;width:auto;font-size:.68rem;padding:6px 12px;border-radius:7px;margin-bottom:0;cursor:pointer;border:none;font-family:var(--dis);font-weight:800;letter-spacing:.03em;transition:opacity .15s}
+.btn-sm:hover{opacity:.85}
+
+/* ─── MESSAGES ────────────────────────────────────────────── */
+.msg{font-size:.68rem;padding:9px 13px;border-radius:8px;margin-bottom:14px;display:none}
+.msg.err{background:#1f080f;border:1px solid var(--red);color:#ff9ab0;display:block}
+.msg.info{background:#081620;border:1px solid var(--blu);color:#9ae8ff;display:block}
+.msg.warn{background:#1f1508;border:1px solid var(--org);color:#ffd07a;display:block}
+
+/* ─── CHIPS ───────────────────────────────────────────────── */
+.crow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;align-items:center}
+.clbl{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-right:2px}
+.chip{font-size:.63rem;padding:4px 9px;border-radius:20px;border:1px solid var(--bdr2);background:var(--card);color:var(--mut);cursor:pointer;transition:all .15s;user-select:none}
+.chip.on{background:var(--prp);border-color:var(--prp);color:#0b0c0f}
+.chip.on-grn{background:var(--acc);border-color:var(--acc);color:#0b0c0f}
+
+/* ─── TABLES ──────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:.68rem}
+.tbl th{text-align:left;font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding:7px 9px;border-bottom:1px solid var(--bdr);background:var(--sur);position:sticky;top:0}
+.tbl td{padding:7px 9px;border-bottom:1px solid var(--bdr);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr.dimmed td{opacity:.35}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bdr);border-radius:10px;margin-bottom:16px}
+.badge{display:inline-block;font-size:.56rem;padding:2px 6px;border-radius:4px;margin-left:4px;font-weight:600}
+.b-red{background:#2a080f;color:var(--red);border:1px solid var(--red)}
+.b-grn{background:#0e1f08;color:var(--acc);border:1px solid var(--adm)}
+.b-prp{background:#1a1030;color:var(--prp);border:1px solid var(--prp)}
+.b-org{background:#1f1508;color:var(--org);border:1px solid var(--org)}
+.b-blu{background:#081620;color:var(--blu);border:1px solid var(--blu)}
+.b-ylw{background:#1f1a08;color:var(--ylw);border:1px solid var(--ylw)}
+
+/* ─── SUMMARY CHIPS ───────────────────────────────────────── */
+.sumrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.sumc{background:var(--card);border:1px solid var(--bdr2);border-radius:8px;padding:8px 12px;transition:box-shadow .2s}
+.sumc:hover{box-shadow:var(--glow-acc)}
+.sumc-lbl{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+.sumc-val{font-family:var(--dis);font-size:.95rem;font-weight:800}
+
+/* ─── PART FINDER ─────────────────────────────────────────── */
+.pf-search-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:640px){.pf-search-row{grid-template-columns:1fr}}
+.pf-results-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:400px;overflow-y:auto;padding:2px}
+@media(max-width:640px){.pf-results-grid{grid-template-columns:1fr}}
+.pf-card{background:var(--card);border:1px solid var(--bdr2);border-radius:9px;padding:12px;cursor:pointer;transition:border-color .15s,background .15s;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.pf-card:hover{border-color:var(--prp)}
+.pf-card.sel{border-color:var(--acc);background:#0f1d07}
+.pf-pn{font-family:var(--dis);font-size:.82rem;font-weight:800;color:var(--acc)}
+.pf-model{font-size:.65rem;color:var(--mut);margin-top:2px}
+.pf-type{font-size:.6rem;margin-top:4px}
+.hht-cart-item{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:.7rem}
+.hht-cart-item:last-child{border-bottom:none}
+.qty-inp{background:var(--sur);border:1px solid var(--bdr2);border-radius:6px;color:var(--txt);font-family:var(--mono);font-size:.7rem;padding:4px 8px;width:65px;outline:none;text-align:center}
+.del-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding:2px 6px}
+
+/* ─── STOCKTAKE ───────────────────────────────────────────── */
+.wk-selector{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.wk-btn{font-size:.62rem;padding:4px 9px;border-radius:6px;border:1px solid var(--bdr2);background:var(--card);color:var(--mut);cursor:pointer;transition:all .15s}
+.wk-btn.active{background:var(--acc);border-color:var(--acc);color:#0b0c0f}
+.wk-btn.filled{border-color:var(--adm);color:var(--adm)}
+.wk-btn.missing{border-color:var(--red);color:var(--red)}
+.stk-trendline{height:40px;width:100%;position:relative;display:flex;align-items:flex-end;gap:1px}
+.stk-bar{flex:1;background:var(--acc);border-radius:2px 2px 0 0;opacity:.7;transition:height .3s,opacity .2s;min-height:1px}
+.stk-bar:hover{opacity:1}
+.missing-banner{background:#1f0a0a;border:1px solid var(--red);border-radius:10px;padding:12px 15px;margin-bottom:14px}
+.missing-name{display:inline-block;background:#2a080f;border:1px solid var(--red);border-radius:5px;padding:3px 8px;font-size:.65rem;color:#ff9ab0;margin:2px}
+
+/* ─── TREND PREDICTOR ─────────────────────────────────────── */
+.trend-canvas-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px;margin-bottom:14px}
+canvas.trend-canvas{width:100%;height:160px;display:block}
+
+/* ─── DEBUG ───────────────────────────────────────────────── */
+.dbg-toggle{font-size:.58rem;color:var(--mut);background:none;border:none;cursor:pointer;font-family:var(--mono);text-decoration:underline;margin-top:16px;padding:0}
+.dbg{display:none;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;padding:12px;margin-top:6px;font-size:.61rem;color:var(--mut);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:180px;overflow-y:auto}
+.dbg.open{display:block}
+.fm-sep{color:var(--bdr2);margin:0 6px;align-self:center}
+.gdrive-btn{cursor:pointer;font-family:var(--mono);font-size:.65rem;display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px dashed var(--bdr2);border-radius:8px;padding:5px 10px;color:var(--mut);transition:all .2s}
+.gdrive-btn:hover{border-color:var(--blu);color:var(--blu)}
+.gdrive-btn.connected{border-style:solid;border-color:var(--blu);color:var(--blu)}
+.gdrive-btn.connected .fm-dot{background:var(--blu);box-shadow:0 0 6px var(--blu)}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─────────────────────────────────────────────── -->
+<div class="hdr">
+  <div class="hdr-dot"></div>
+  <div>
+    <h1>PURE<span>STATS</span></h1>
+    <div class="hdr-sub">Purchasing Intelligence · v5</div>
+  </div>
+  <div class="hdr-right">
+    <button class="theme-btn active" onclick="setTheme('')">Dark</button>
+    <button class="theme-btn" onclick="setTheme('cyber')">⚡ Cyber</button>
+    <button class="theme-btn" onclick="setTheme('ember')">🔥 Ember</button>
+    <button class="theme-btn" onclick="setTheme('ghost')">👻 Ghost</button>
+    <button class="theme-btn" onclick="setTheme('matrix')">💊 Matrix</button>
+    <button class="theme-btn" onclick="setTheme('synth')">🌆 Synthwave</button>
+    <button class="theme-btn" onclick="setTheme('aurora')">🌌 Aurora</button>
+    <button class="theme-btn" onclick="setTheme('steel')">🔩 Steel</button>
+  </div>
+</div>
+
+<!-- ─── UNIFIED FILE MANAGER ───────────────────────────────── -->
+<div class="file-manager">
+  <span class="fm-label">Files:</span>
+  <label class="fm-chip" id="fm-export">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('export',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-export">Full Export</span>
+  </label>
+  <label class="fm-chip" id="fm-sold">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('sold',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-sold">Sold List</span>
+  </label>
+  <label class="fm-chip" id="fm-dispatch">
+    <input type="file" accept=".xlsx,.xls" onchange="loadSheet('dispatch',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-dispatch">Dispatch Dashboard</span>
+  </label>
+  <label class="fm-chip" id="fm-stk">
+    <input type="file" accept=".xlsx,.xls" onchange="loadSheet('stk',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-stk">Stocktake</span>
+  </label>
+  <label class="fm-chip" id="fm-arriving">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('arriving',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-arriving">Arriving Sheet</span>
+  </label>
+  <label class="fm-chip" id="fm-parts">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('parts',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-parts">Part Numbers</span>
+  </label>
+  <label class="fm-chip" id="fm-col1">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('col1',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-col1">Collection 1</span>
+  </label>
+  <label class="fm-chip" id="fm-col2">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('col2',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-col2">Collection 2</span>
+  </label>
+  <label class="fm-chip" id="fm-col3">
+    <input type="file" accept=".csv,.xlsx,.xls" onchange="loadSheet('col3',this)">
+    <div class="fm-dot"></div><span class="fm-name" id="fn-col3">Collection 3</span>
+  </label>
+  <span class="fm-sep">|</span>
+  <span class="fm-label">🔗 Drive:</span>
+  <button class="fm-chip gdrive-btn" id="gdrive-auth-btn" onclick="gdriveAuth()">
+    <div class="fm-dot" id="gdrive-dot"></div><span id="gdrive-status">Connect Drive</span>
+  </button>
+  <button class="fm-chip gdrive-btn" id="gdrive-pick-dispatch" onclick="gdrivePick('dispatch')" style="display:none">
+    <div class="fm-dot" id="gd-dot-dispatch"></div><span id="gd-fn-dispatch">Pick Dispatch</span>
+  </button>
+  <button class="fm-chip gdrive-btn" id="gdrive-pick-stk" onclick="gdrivePick('stk')" style="display:none">
+    <div class="fm-dot" id="gd-dot-stk"></div><span id="gd-fn-stk">Pick Stocktake</span>
+  </button>
+  <button class="fm-chip gdrive-btn" id="gdrive-pick-arriving" onclick="gdrivePick('arriving')" style="display:none">
+    <div class="fm-dot" id="gd-dot-arriving"></div><span id="gd-fn-arriving">Pick Arriving</span>
+  </button>
+</div><!-- /file-manager -->
+
+<!-- ─── TABS ───────────────────────────────────────────────── -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">📊 Stats</button>
+  <button class="tab" onclick="switchTab(1)">🚚 Dispatch</button>
+  <button class="tab" onclick="switchTab(2)">📈 Price vs Target</button>
+  <button class="tab" onclick="switchTab(3)">🔩 Part Finder</button>
+  <button class="tab" onclick="switchTab(4)">📦 Collections</button>
+  <button class="tab" onclick="switchTab(5)">📋 Stocktake</button>
+  <button class="tab" onclick="switchTab(6)">📉 Trends</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 0 — STATS                                             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel active" id="p0"><div class="wrap">
+  <div class="drow">
+    <label>Week</label>
+    <input class="inp" style="width:140px" type="date" id="wk-s">
+    <span style="color:var(--mut)">→</span>
+    <input class="inp" style="width:140px" type="date" id="wk-e">
+    <span style="font-size:.59rem;color:var(--mut)">Mon→Sun previous week</span>
+  </div>
+  <div class="msg" id="msg-stats"></div>
+  <button class="btn btn-grn" onclick="calcStats()">↳ Calculate Stats</button>
+  <div class="sgrid">
+    <div class="sc" data-k="week" id="sc-week"><div class="sc-lbl">Bought This Week</div><div class="sc-ttl">Weekly Purchase NET</div><div class="sc-val" id="sv-week">—</div><div class="sc-cnt" id="sc-wc"></div><div class="sc-dsc">NET ex VAT from Arriving sheet within the selected week range.</div></div>
+    <div class="sc" data-k="good" id="sc-good"><div class="sc-lbl">Good Stock</div><div class="sc-ttl">Saleable Inventory</div><div class="sc-val" id="sv-good">—</div><div class="sc-cnt" id="sc-gc"></div><div class="sc-dsc">Grades A & A- only (blanks incl, Ungraded excl). Statuses: Arrived, Awaiting Arrival, Tested, In Stock, Booked In, Blown Out, To Be Painted, Prepared for Order, Sent for Painting, Warranty.</div></div>
+    <div class="sc" data-k="all" id="sc-all"><div class="sc-lbl">All Stock</div><div class="sc-ttl">Total Inventory Value</div><div class="sc-val" id="sv-all">—</div><div class="sc-cnt" id="sc-ac"></div><div class="sc-dsc">All grades · Excl Recycled, Refunded, Sold, Sold Stock Adjustment.</div></div>
+    <div class="sc" data-k="ret" id="sc-ret"><div class="sc-lbl">Combined Returns</div><div class="sc-ttl">Returns Pipeline</div><div class="sc-val" id="sv-ret">—</div><div class="sc-cnt" id="sc-rc"></div><div class="sc-dsc">Return Raised · Returned - Awaiting Refund/Replacement · To Be Return</div></div>
+  </div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 1 — DISPATCH                                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p1"><div class="wrap">
+  <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:.69rem;color:var(--mut)">
+    Uses <strong style="color:var(--txt)">Full Export</strong> (for stock matching, RAM & charger counts) + <strong style="color:var(--txt)">Dispatch Dashboard</strong> (via Drive or manual) which contains the Dispatch, Arriving and Parts tabs all in one file.
+  </div>
+  <div class="slabel">Order Status Filter</div>
+  <div class="crow">
+    <span class="clbl">Show:</span>
+    <span class="chip on" data-s="To be Shipped" onclick="this.classList.toggle('on')">To Be Shipped</span>
+    <span class="chip on" data-s="Waiting for Stock" onclick="this.classList.toggle('on')">Waiting for Stock</span>
+    <span class="chip" data-s="Prepared" onclick="this.classList.toggle('on')">Prepared</span>
+  </div>
+  <div class="msg" id="msg-dispatch"></div>
+  <button class="btn btn-prp" onclick="calcDispatch()">↳ Run Stock Check</button>
+  <div id="dispatch-results"><div class="empty"><div>📋</div>Load Full Export + Dispatch (via Drive or manual), then run</div></div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 2 — PRICE VS TARGET                                   -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p2"><div class="wrap">
+  <div class="msg" id="msg-pvt"></div>
+  <button class="btn btn-org" onclick="calcPvT()">↳ Generate Price vs Target Output</button>
+  <div id="pvt-results"><div class="empty"><div>📈</div>Load Sold List then generate</div></div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 3 — PART FINDER                                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p3"><div class="wrap">
+  <div class="slabel">Search Parts</div>
+  <div class="pf-search-row">
+    <input class="inp" id="pf-q" placeholder="Model, PN, or type… e.g. 7400, battery" oninput="searchParts()">
+    <select class="inp" id="pf-type" onchange="searchParts()"><option value="">All types</option></select>
+    <select class="inp" id="pf-model-filter" onchange="searchParts()"><option value="">All models</option></select>
+  </div>
+  <div id="pf-results"><div class="empty"><div>🔩</div>Upload Part Numbers sheet via file bar above</div></div>
+  <div class="div"></div>
+  <div class="slabel" style="color:var(--prp)">China Order Cart</div>
+  <div id="hht-cart-wrap"><div class="empty"><div>🛒</div>Click parts above to add to cart</div></div>
+  <div id="hht-actions" style="display:none;margin-top:12px">
+    <button class="btn btn-prp" onclick="downloadHHT()">⬇ Download HHT Request Sheet (.xlsx)</button>
+  </div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 4 — COLLECTION ANALYSIS                               -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p4"><div class="wrap">
+  <div class="drow" style="margin-bottom:18px">
+    <label>New order size</label>
+    <input class="inp" style="width:110px" type="number" id="ca-qty" placeholder="e.g. 100" min="1">
+    <span style="font-size:.62rem;color:var(--mut)">machines</span>
+  </div>
+  <div class="msg" id="msg-ca"></div>
+  <button class="btn btn-blu" onclick="calcCollection()">↳ Predict Parts Required</button>
+  <div id="ca-results"><div class="empty"><div>📦</div>Load 1–3 Collection exports, enter order qty</div></div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 5 — STOCKTAKE                                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p5"><div class="wrap">
+  <div class="msg" id="msg-stk"></div>
+  <button class="btn btn-grn" onclick="calcStocktake()">↳ Check Stocktake</button>
+  <div id="stk-results"><div class="empty"><div>📋</div>Load Stocktake sheet then check</div></div>
+</div></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TAB 6 — TRENDS                                            -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="panel" id="p6"><div class="wrap">
+  <p style="font-size:.72rem;color:var(--mut);margin-bottom:16px">Load the Stocktake sheet to see weekly trends, depletion rates, and "runs out by" predictions for every item.</p>
+  <div class="slabel">Filter Item</div>
+  <div class="g2" style="margin-bottom:14px">
+    <select class="inp" id="trend-sheet-sel" onchange="renderTrendItem()"><option value="">Select sheet…</option></select>
+    <select class="inp" id="trend-item-sel" onchange="renderTrendItem()"><option value="">Select item…</option></select>
+  </div>
+  <div id="trend-results"><div class="empty"><div>📉</div>Load Stocktake and select an item</div></div>
+  <div class="div"></div>
+  <div class="sec-hdr">⚠ Predicted Runout — All Items</div>
+  <p style="font-size:.65rem;color:var(--mut);margin-bottom:12px">Items predicted to hit zero before next restock (based on avg weekly depletion rate).</p>
+  <div id="runout-results"><div class="empty"><div>⏱</div>Load Stocktake sheet</div></div>
+</div></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STATE & UTILS
+// ═══════════════════════════════════════════════════════════════
+const S={};           // loaded sheets
+let allParts=[];      // parsed part rows
+const hhtCart=[];     // china order cart
+let stkData=null;     // parsed stocktake data
+let trendStoreKey='purestats_trends';
+
+// Trend storage (in-memory accumulator across sessions)
+let trendHistory=JSON.parse(localStorage.getItem(trendStoreKey)||'{}');
+
+const nn=s=>String(s||'').trim().toLowerCase();
+const toNum=v=>{if(typeof v==='number')return isNaN(v)?0:v;const p=parseFloat(String(v||'').replace(/[^0-9.\-]/g,''));return isNaN(p)?0:p;};
+const fmt=v=>'£'+Number(v).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+function findCol(row,...c){const k=Object.keys(row);for(const x of c){const h=k.find(j=>nn(j).includes(nn(x)));if(h)return h;}return null;}
+function setMsg(id,txt,type='err'){const e=document.getElementById(id);e.textContent=txt;e.className='msg '+type;}
+function clearMsg(id){document.getElementById(id).className='msg';}
+
+// ═══════════════════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════════════════
+function setTheme(t){
+  document.body.className=t?'theme-'+t:'';
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  localStorage.setItem('purestats_theme',t);
+}
+(function(){const t=localStorage.getItem('purestats_theme')||'';if(t)document.body.className='theme-'+t;document.querySelectorAll('.theme-btn').forEach(b=>{if(b.textContent.toLowerCase().includes(t||'dark'))b.classList.add('active');});})();
+
+// ═══════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DATE PREFILL
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const t=new Date(),d=t.getDay();
+  const mon=new Date(t);mon.setDate(t.getDate()-((d===0?6:d-1)+7));
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const f=d=>d.toISOString().slice(0,10);
+  document.getElementById('wk-s').value=f(mon);
+  document.getElementById('wk-e').value=f(sun);
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  UNIFIED FILE LOADER
+// ═══════════════════════════════════════════════════════════════
+function loadSheet(key,input){
+  const file=input.files[0];if(!file)return;
+  const fnEl=document.getElementById('fn-'+key);
+  const fmEl=document.getElementById('fm-'+key);
+  if(fnEl)fnEl.textContent='Reading…';
+  const r=new FileReader();
+  r.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true,dense:false});
+      let sname=wb.SheetNames[0];
+      if(key==='dispatch'){const h=wb.SheetNames.find(n=>/dispatch/i.test(n)&&!/instr/i.test(n));if(h)sname=h;}
+      if(key==='arriving'){const h=wb.SheetNames.find(n=>/arriv/i.test(n));if(h)sname=h;}
+      const ws=wb.Sheets[sname];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+      const rowsRaw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+      S[key]={rows,rowsRaw,wb,sname,fileName:file.name};
+      if(fmEl){fmEl.classList.add('loaded');}
+      const shortName=file.name.replace(/\.[^.]+$/,'').slice(0,16);
+      if(fnEl)fnEl.textContent=shortName;
+      // Trigger post-load hooks
+      if(key==='parts')parseParts();
+      if(key==='stk')parseStkData();
+    }catch(err){
+      if(fmEl)fmEl.classList.add('err');
+      if(fnEl)fnEl.textContent='Error';
+      console.error(key,err);
+    }
+  };
+  r.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 0 — STATS
+// ═══════════════════════════════════════════════════════════════
+const GOOD_ST=new Set(['arrived','awaiting arrival','tested','in stock','instock','booked in','boked in','blown out','to be painted','prepared for order','sent for painting','sent for painitng','warranty','warranty stock']);
+const GOOD_GR=new Set(['a','a-','']);
+const ALL_EX=new Set(['recycled','refunded','sold','sold (stock adjustment)','sold stock adjustment']);
+const isRet=s=>{
+  const v=nn(s);
+  return v==='return raised'||
+         v==='returned - awaiting refund/replacement'||
+         v==='to be return';
+};
+
+function calcStats(){
+  clearMsg('msg-stats');
+  const ws=document.getElementById('wk-s').value,we=document.getElementById('wk-e').value;
+  let wT=0,wC=0;
+  if(S.arriving&&ws&&we){
+    const {rows,rowsRaw}=S.arriving;const sm=rows[0]||{};
+    const dC=findCol(sm,'date','created','arrived','purchase');
+    const pC=findCol(sm,'total ex vat','ex vat','net','price','cost');
+    const s0=new Date(ws+'T00:00:00'),s1=new Date(we+'T23:59:59');
+    if(dC&&pC)rows.forEach((row,i)=>{
+      const raw=row[dC];let d;
+      if(raw instanceof Date)d=raw;
+      else if(typeof raw==='number')d=new Date((raw-25569)*86400000);
+      else d=new Date(raw);
+      if(!isNaN(d)&&d>=s0&&d<=s1){wT+=toNum(rowsRaw[i][pC]);wC++;}
+    });
+  }
+  let gT=0,gC=0,aT=0,aC=0,rT=0,rC=0;
+  if(S.export){
+    const {rows,rowsRaw}=S.export;const sm=rows[0]||{};
+    const pC=findCol(sm,'price'),stC=findCol(sm,'stock status','status'),grC=findCol(sm,'justified grade','grade');
+    if(pC&&stC)rows.forEach((row,i)=>{
+      const st=nn(row[stC]),gr=nn(row[grC]||''),p=toNum(rowsRaw[i][pC]);
+      if(GOOD_ST.has(st)&&GOOD_GR.has(gr)){gT+=p;gC++;}
+      if(!ALL_EX.has(st)){aT+=p;aC++;}
+      if(isRet(st)){rT+=p;rC++;}
+    });
+  }
+  function setCard(sid,vid,cid,total,count,on){
+    document.getElementById(vid).textContent=on?fmt(total):'—';
+    document.getElementById(cid).textContent=on?`${count.toLocaleString()} items`:'';
+    document.getElementById(sid).classList.toggle('on',on);
+  }
+  setCard('sc-week','sv-week','sc-wc',wT,wC,!!S.arriving&&!!ws);
+  setCard('sc-good','sv-good','sc-gc',gT,gC,!!S.export);
+  setCard('sc-all','sv-all','sc-ac',aT,aC,!!S.export);
+  setCard('sc-ret','sv-ret','sc-rc',rT,rC,!!S.export);
+
+  // Store snapshot in trend history
+  if(S.export){
+    const dateKey=new Date().toISOString().slice(0,10);
+    trendHistory[dateKey]={goodStock:gT,allStock:aT,returns:rT,weeklyPurchase:wT};
+    localStorage.setItem(trendStoreKey,JSON.stringify(trendHistory));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 1 — DISPATCH
+// ═══════════════════════════════════════════════════════════════
+const AVAIL_ST=new Set(['arrived','awaiting arrival','tested','in stock','instock','booked in','boked in','blown out','to be painted','prepared for order','sent for painting','sent for painitng','warranty','warranty stock']);
+
+// ── Charger matching from export's Optical column ──────────────
+const CHARGER_TYPE_MAP=[
+  {match:['latitude 5','latitude 7300','latitude 7310','latitude 7320','latitude 7330','latitude 7400','latitude 7410','latitude 7420','latitude 7430'],opticalKey:'Dell Latitude Laptop (USB-C',label:'Dell USB-C 65W'},
+  {match:['latitude 7480','latitude 7490','latitude e74'],opticalKey:'Dell Latitude Laptop / Dock (Normal 7.4mm',label:'Dell 7.4mm 65W'},
+  {match:['elitebook 830','elitebook 840','elitebook 850','elitebook 1040'],opticalKey:'HP EliteBook G3-G8 Laptop/Dock (Blue Pin',label:'HP Blue Pin 65W'},
+  {match:['chromebook'],opticalKey:'HP EliteBook/Chromebook (USB-C',label:'HP USB-C 45W'},
+  {match:['precision'],opticalKey:'Dell Precision Laptop',label:'Dell Precision 180W+'},
+  {match:['thinkpad'],opticalKey:'Lenovo laptops',label:'Lenovo 65W'},
+];
+function getChargerTypeInfo(model){
+  const m=nn(model);
+  for(const e of CHARGER_TYPE_MAP)if(e.match.some(k=>m.includes(k)))return e;
+  return {opticalKey:'Dell Latitude Laptop (USB-C',label:'Dell USB-C 65W'};
+}
+function countChargersFromExport(opticalKey){
+  if(!S.export)return null;
+  return S.export.rows.filter(r=>r['Item Type']==='Laptop-Charger'&&AVAIL_ST.has(nn(r['Stock Status']||''))&&String(r['Optical']||'').includes(opticalKey)).length;
+}
+function getRamCountFromExport(ramStr){
+  if(!S.export)return null;
+  const target=nn(ramStr).replace(/\s/g,'');
+  return S.export.rows.filter(r=>r['Item Type']==='RAM'&&AVAIL_ST.has(nn(r['Stock Status']||''))&&nn(r['Ram']||'').replace(/\s/g,'')===target).length;
+}
+
+function modelMatch(d,s){
+  const dm=nn(d).replace(/[^a-z0-9\s]/g,''),sm=nn(s).replace(/[^a-z0-9\s]/g,'');
+  const words=dm.split(/\s+/).filter(w=>w.length>2&&!/^(for|and|n\/a|na|the)$/.test(w));
+  if(!words.length)return false;
+  return words.filter(w=>sm.includes(w)).length>=Math.ceil(words.length*.6);
+}
+function ramMatch(n,h){if(!n||nn(n)==='na'||nn(n)==='n/a')return true;return nn(h).includes(nn(n).replace(/\s/g,''));}
+function ssdMatch(n,h){
+  if(!n||nn(n)==='na'||nn(n)==='n/a'||nn(n)==='no ssd')return true;
+  const gb=s=>{const m=String(s).match(/(\d+)\s*(gb|tb)/i);if(!m)return null;return m[2].toLowerCase()==='tb'?parseInt(m[1])*1000:parseInt(m[1]);};
+  const nv=gb(n),hv=gb(h);if(nv===null)return true;if(hv===null)return false;return hv>=nv;
+}
+
+function getStkQty(itemNameHint){
+  if(!stkData)return null;
+  for(const sheet of Object.values(stkData)){
+    for(const item of sheet.items){
+      if(nn(item.name).includes(nn(itemNameHint))){
+        const vals=item.weekValues.filter(v=>v!==null);
+        if(vals.length)return vals[vals.length-1];
+      }
+    }
+  }
+  return null;
+}
+
+function calcDispatch(){
+  clearMsg('msg-dispatch');
+  if(!S.export||!S.dispatch){setMsg('msg-dispatch','Load Full Export and Dispatch Dashboard (via Drive or file bar).');return;}
+  const activeStatuses=[...document.querySelectorAll('#p1 .chip.on')].map(c=>nn(c.dataset.s));
+  const {rows:dRows}=S.dispatch;
+  const dCols=Object.keys(dRows[0]||{});
+  const notesKey=dCols.find(k=>nn(k)==='notes')||dCols[11];
+  const partsKey=dCols.find(k=>nn(k).includes('parts stock')||nn(k).includes('parts prepared'))||dCols[19];
+  const {rows:sRows}=S.export;
+  const availStock=sRows.filter(r=>AVAIL_ST.has(nn(r['Stock Status']||'')));
+
+  const activeOrders=[];
+  dRows.forEach(r=>{
+    const order=String(r[dCols[0]]||'').trim();
+    const qty=Math.round(toNum(r[dCols[3]]));
+    const pc=String(r[dCols[4]]||'').trim();
+    const model=String(r[dCols[5]]||'').trim();
+    const status=String(r[dCols[15]]||'').trim();
+    if(!order||!model||!status||!activeStatuses.includes(nn(status))||qty<=0)return;
+    activeOrders.push({
+      order,qty,pc,model,
+      size:String(r[dCols[6]]||'').trim(),cpu:String(r[dCols[7]]||'').trim(),
+      ram:String(r[dCols[8]]||'').trim(),ssd:String(r[dCols[9]]||'').trim(),
+      status,
+      notes:String(r[notesKey]||'').trim(),
+      partsNote:String(r[partsKey]||'').trim(),
+    });
+  });
+
+  const reqMap={};
+  activeOrders.forEach(o=>{
+    const label=`${o.model}||${o.cpu}||${o.ram}||${o.ssd}||${o.pc}`;
+    if(!reqMap[label])reqMap[label]={...o,qty:0,orders:[],notes:[],partsNotes:[]};
+    reqMap[label].qty+=o.qty;
+    if(!reqMap[label].orders.includes(o.order))reqMap[label].orders.push(o.order);
+    if(o.notes&&!reqMap[label].notes.includes(o.notes))reqMap[label].notes.push(o.notes);
+    if(o.partsNote&&!reqMap[label].partsNotes.includes(o.partsNote))reqMap[label].partsNotes.push(o.partsNote);
+  });
+
+  const ramNeeds={};
+  activeOrders.filter(o=>o.pc==='LAP'||o.pc==='PC').forEach(o=>{
+    const r=o.ram||'';if(!r||nn(r)==='na'||nn(r)==='n/a')return;
+    ramNeeds[r.trim()]=(ramNeeds[r.trim()]||0)+o.qty;
+  });
+
+  const chargerNeeds={};
+  activeOrders.filter(o=>o.pc==='LAP').forEach(o=>{
+    const info=getChargerTypeInfo(o.model);
+    if(!chargerNeeds[info.label])chargerNeeds[info.label]={qty:0,opticalKey:info.opticalKey};
+    chargerNeeds[info.label].qty+=o.qty;
+  });
+
+  const needList=[];
+  Object.values(reqMap).forEach(req=>{
+    const isPart=req.pc==='PER'||req.pc==='MON'||req.pc==='ACC';
+    const have=isPart
+      ?availStock.filter(s=>modelMatch(req.model,nn(s['Model']||''))).length
+      :availStock.filter(s=>modelMatch(req.model,nn(s['Model']||''))&&ramMatch(req.ram,s['Ram']||'')&&ssdMatch(req.ssd,s['Drive Size']||'')).length;
+    needList.push({...req,have,short:Math.max(0,req.qty-have),type:isPart?'Part':req.pc==='LAP'?'Laptop':'Desktop'});
+  });
+
+  const totShort=needList.filter(r=>r.short>0).reduce((a,r)=>a+r.short,0);
+  const totOk=needList.filter(r=>r.short===0).length;
+
+  let html=`<div class="sumrow">
+    <div class="sumc"><div class="sumc-lbl">Order Lines</div><div class="sumc-val" style="color:var(--prp)">${needList.length}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Units Needed</div><div class="sumc-val">${needList.reduce((a,r)=>a+r.qty,0)}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Lines OK</div><div class="sumc-val" style="color:var(--acc)">${totOk}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Units Short</div><div class="sumc-val" style="color:var(--red)">${totShort}</div></div>
+  </div>`;
+
+  html+=`<div class="sec-hdr" style="color:var(--prp)">📦 Machines & Parts</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item / Spec</th><th>Type</th><th>Orders</th><th>Need</th><th>Have</th><th>Buy</th><th>Notes (col L)</th><th>Parts (col T)</th></tr></thead><tbody>`;
+  [...needList].sort((a,b)=>b.short-a.short).forEach(r=>{
+    const buy=r.short>0?`<span style="color:var(--red);font-weight:700">⚠ ${r.short}</span>`:`<span style="color:var(--acc)">✓</span>`;
+    html+=`<tr class="${r.short===0?'dimmed':''}">
+      <td>${r.model}<br><span style="color:var(--mut);font-size:.61rem">${[r.cpu,r.ram,r.ssd].filter(x=>x&&nn(x)!=='na').join(' · ')}</span></td>
+      <td><span class="badge b-prp">${r.type}</span></td>
+      <td style="font-size:.6rem;color:var(--mut)">${r.orders.join(', ')}</td>
+      <td>${r.qty}</td><td>${r.have}</td><td>${buy}</td>
+      <td style="font-size:.62rem;color:var(--ylw)">${r.notes.filter(Boolean).join(' · ')}</td>
+      <td style="font-size:.62rem;color:var(--blu)">${r.partsNotes.filter(Boolean).join(' · ')}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  if(Object.keys(ramNeeds).length){
+    html+=`<div class="sec-hdr" style="color:var(--blu)">🧮 RAM Required</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>RAM</th><th>Need</th><th>Export Stock</th><th>Stocktake</th><th>Status</th></tr></thead><tbody>`;
+    Object.entries(ramNeeds).forEach(([ram,qty])=>{
+      const expQ=getRamCountFromExport(ram);const stkQ=getStkQty(ram.replace(/GB/i,'').trim());
+      const best=expQ!==null?expQ:stkQ;const ok=best!==null&&best>=qty;
+      html+=`<tr><td>${ram}</td><td>${qty}</td><td>${expQ!==null?expQ:'—'}</td><td>${stkQ!==null?stkQ:'—'}</td><td>${best===null?'<span class="badge b-ylw">no data</span>':ok?'<span class="badge b-grn">✓ OK</span>':`<span class="badge b-red">⚠ short ${qty-best}</span>`}</td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  if(Object.keys(chargerNeeds).length){
+    html+=`<div class="sec-hdr" style="color:var(--org)">🔌 Chargers Required</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Charger Type</th><th>Need</th><th>Export Stock</th><th>Stocktake</th><th>Status</th></tr></thead><tbody>`;
+    Object.entries(chargerNeeds).forEach(([label,{qty,opticalKey}])=>{
+      const expQ=countChargersFromExport(opticalKey);const stkQ=getStkQty(label);
+      const best=expQ!==null?expQ:stkQ;const ok=best!==null&&best>=qty;
+      html+=`<tr><td>${label}</td><td>${qty}</td><td>${expQ!==null?expQ:'—'}</td><td>${stkQ!==null?stkQ:'—'}</td><td>${best===null?'<span class="badge b-ylw">no data</span>':ok?'<span class="badge b-grn">✓ OK</span>':`<span class="badge b-red">⚠ short ${qty-best}</span>`}</td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  document.getElementById('dispatch-results').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 2 — PRICE VS TARGET
+// ═══════════════════════════════════════════════════════════════
+// PVT_MAP — exact same row order as the Price vs Target sheet
+// proc field = what goes in Processor column (copied verbatim from sheet)
+const PVT_MAP=[
+  // ── Laptops ──────────────────────────────────────────────────
+  {label:'7420',      proc:'i5', type:'LAPTOP',  m:'latitude 7420 16gb', no2in1:true, cpu:'i5'},
+  {label:'7400',      proc:'i5', type:'LAPTOP',  m:'latitude 7400',      no2in1:true, cpu:'i5'},
+  {label:'5300',      proc:'i5', type:'LAPTOP',  m:'latitude 5300',      no2in1:true, cpu:'i5'},
+  {label:'7300',      proc:'i5', type:'LAPTOP',  m:'latitude 7300',      no2in1:true, cpu:'i5'},
+  {label:'5520',      proc:'i5', type:'LAPTOP',  m:'latitude 5520',      no2in1:true, cpu:'i5'},
+  {label:'5420',      proc:'i5', type:'LAPTOP',  m:'latitude 5420',      no2in1:true, cpu:'i5'},
+  {label:'840 g6',    proc:'i5', type:'LAPTOP',  m:'elitebook 840 g6',   no2in1:true, cpu:'i5'},
+  {label:'840 g7',    proc:'i5', type:'LAPTOP',  m:'elitebook 840 g7',   no2in1:true, cpu:'i5'},
+  {label:'Chromebook',proc:'',   type:'LAPTOP',  m:'chromebook'},
+  {label:'5500',      proc:'i5', type:'LAPTOP',  m:'latitude 5500',      no2in1:true, cpu:'i5'},
+  {label:'5410',      proc:'i5', type:'LAPTOP',  m:'latitude 5410',      no2in1:true, cpu:'i5'},
+  {label:'840 g8',    proc:'i5', type:'LAPTOP',  m:'elitebook 840 g8',   no2in1:true, cpu:'i5'},
+  {label:'5310 2 in 1',proc:'',  type:'LAPTOP',  m:'latitude 5310',      req2in1:true},
+  {label:'7390',      proc:'',   type:'LAPTOP',  m:'latitude 7390'},
+  // ── Desktops ─────────────────────────────────────────────────
+  {label:'3060 SFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3060',      ff:'sff',              cpu:'i5'},
+  {label:'3060 MFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3060',      ff:['mff','micro','mini'], cpu:'i5'},
+  {label:'5060 sff',  proc:'i5', type:'DESKTOP', m:'optiplex 5060',      ff:'sff',              cpu:'i5'},
+  {label:'3070 SFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3070',      ff:'sff',              cpu:'i5'},
+  {label:'3070 MFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3070',      ff:['mff','micro','mini'], cpu:'i5'},
+  {label:'3080 SFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3080',      ff:'sff',              cpu:'i5'},
+  {label:'3080 MFF',  proc:'i5', type:'DESKTOP', m:'optiplex 3080',      ff:['mff','micro','mini'], cpu:'i5'},
+  {label:'800 G6 MFF',proc:'i5', type:'DESKTOP', m:'prodesk 800 g6',     ff:['mff','micro'],    cpu:'i5'},
+  {label:'800 g5 sff',proc:'i5', type:'DESKTOP', m:'prodesk 800 g5',     ff:'sff',              cpu:'i5'},
+  {label:'800 g5 MFF',proc:'i5', type:'DESKTOP', m:'prodesk 800 g5',     ff:['mff','micro'],    cpu:'i5'},
+  {label:'7090 MFF',  proc:'i5', type:'DESKTOP', m:'optiplex 7090',      ff:['mff','micro'],    cpu:'i5'},
+  {label:'400 g7',    proc:'i5', type:'DESKTOP', m:'elitedesk 400 g7',                          cpu:'i5'},
+  {label:'5090',      proc:'mff',type:'DESKTOP', m:'optiplex 5090',      ff:['mff','micro']},
+  {label:'600 g4',    proc:'sff i5', type:'DESKTOP', m:'prodesk 600 g4', ff:'sff',              cpu:'i5'},
+  {label:'800 g3',    proc:'sff i5', type:'DESKTOP', m:'prodesk 800 g3', ff:'sff',              cpu:'i5'},
+  {label:'600 G6',    proc:'sff I5', type:'DESKTOP', m:'prodesk 600 g6', ff:'sff',              cpu:'i5'},
+  {label:'5080',      proc:'SFF I5', type:'DESKTOP', m:'optiplex 5080',  ff:'sff',              cpu:'i5'},
+  {label:'800 g4',    proc:'mff i5', type:'DESKTOP', m:'prodesk 800 g4', ff:['mff','micro'],    cpu:'i5'},
+  {label:'5080',      proc:'mffi5',  type:'DESKTOP', m:'optiplex 5080',  ff:['mff','micro'],    cpu:'i5'},
+  {label:'5070',      proc:'sff',    type:'DESKTOP', m:'optiplex 5070',  ff:'sff'},
+  {label:'7060',      proc:'i7 sff', type:'DESKTOP', m:'optiplex 7060',  ff:'sff',              cpu:'i7'},
+  {label:'7060',      proc:'I5 SFF', type:'DESKTOP', m:'optiplex 7060',  ff:'sff',              cpu:'i5'},
+  {label:'7080',      proc:'SFF i5', type:'DESKTOP', m:'optiplex 7080',  ff:'sff',              cpu:'i5'},
+  {label:'7080',      proc:'SFF i7', type:'DESKTOP', m:'optiplex 7080',  ff:'sff',              cpu:'i7'},
+  {label:'600 g5',    proc:'sff i5', type:'DESKTOP', m:'prodesk 600 g5', ff:'sff',              cpu:'i5'},
+  {label:'7080',      proc:'mff i3', type:'DESKTOP', m:'optiplex 7080',  ff:['mff','micro'],    cpu:'i3'},
+  {label:'7080',      proc:'mff i5', type:'DESKTOP', m:'optiplex 7080',  ff:['mff','micro'],    cpu:'i5'},
+  // ── Monitors (generic size rows only — named models are separate tabs, skip) ──
+  {label:'22"',       proc:'14/17',  type:'MONITOR', sz:'22'},
+  {label:'23"',       proc:'14/17',  type:'MONITOR', sz:'23'},
+  {label:'24"',       proc:'17/19',  type:'MONITOR', sz:'24'},
+  {label:'2418hzm',   proc:'',       type:'MONITOR', specificModel:'2418hzm'},
+  {label:'U2422H',    proc:'',       type:'MONITOR', specificModel:'u2422h'},
+  {label:'P2213',     proc:'',       type:'MONITOR', specificModel:'p2213'},
+  {label:'E24 g4',    proc:'',       type:'MONITOR', specificModel:'e24 g4'},
+  {label:'E233',      proc:'',       type:'MONITOR', specificModel:'e233'},
+  {label:'MFS 18',    proc:'',       type:'MONITOR', specificModel:'mfs 18'},
+  {label:'OSS17/21',  proc:'',       type:'MONITOR', specificModel:'oss17'},
+  // ── SSDs ─────────────────────────────────────────────────────
+  {label:'128 SSD',   proc:'',       type:'SSD',     ds:'128'},
+  {label:'256 SSD',   proc:'',       type:'SSD',     ds:'256'},
+  {label:'512 SSD',   proc:'',       type:'SSD',     ds:'512'},
+  {label:'1tb ssd',   proc:'',       type:'SSD',     ds:'1000'},
+  // ── Chargers ─────────────────────────────────────────────────
+  {label:'Charger',   proc:'USB dell 65w',   type:'Laptop-Charger', ck:'usb65'},
+  {label:'charger',   proc:'dell 7.4mm',     type:'Laptop-Charger', ck:'7.4mm'},
+  {label:'charger',   proc:'Dell 4.5mm',     type:'Laptop-Charger', ck:'4.5mm'},
+  {label:'charger',   proc:'hp blue pin 65w',type:'Laptop-Charger', ck:'hp_blue'},
+  {label:'charger',   proc:'hp big pin 65w', type:'Laptop-Charger', ck:'hp_big'},
+  // ── Other ─────────────────────────────────────────────────────
+  {label:'Stand',     proc:'',       type:'Monitor Stand'},
+  {label:'Genic KB',  proc:'evo',    type:'KEYBOARD'},
+  {label:'Kb 216',    proc:'',       type:'KEYBOARD'},
+  {label:'hp keyboard',proc:'',      type:'KEYBOARD'},
+  {label:'Hp Mouse',  proc:'',       type:'MOUSE'},
+  {label:'ms116',     proc:'',       type:'MOUSE'},
+  {label:'wd15',      proc:'',       type:'DOCK'},
+  {label:'wd19',      proc:'',       type:'DOCK'},
+  {label:'d9y32aa',   proc:'',       type:'DOCK'},
+  {label:'B300',      proc:'',       type:'DOCK'},
+  {label:'HP usbc',   proc:'',       type:'Laptop-Charger', ck:'hp_usbc'},
+  {label:'Vesa Sleeve',proc:'',      type:'Laptop - Palmrest'},
+  {label:'Genric KB', proc:'',       type:'KEYBOARD'},
+  {label:'c2 universal',proc:'',     type:'DOCK'},
+];
+function matchPvT(row,m){
+  const it=nn(row['Item Type']||'');
+  const mod=nn(row['Model']||'');
+  const ff=nn(row['Form Factor / Drive Type']||'');
+  const cpu=nn(row['CPU Type']||'');
+  const ds=String(row['Drive Size']||'').trim();
+  const scr=String(row['Screen Size / Drive Speed']||'');
+  const scrNum=(scr.match(/(\d+)/)||[])[1];
+  const is2=mod.includes('2 in 1')||mod.includes('2-in-1');
+  if(nn(m.type)!==it)return false;
+  if(m.type==='LAPTOP'){
+    if(!mod.includes(m.m))return false;
+    if(m.req2in1&&!is2)return false;
+    if(m.no2in1&&is2)return false;
+    if(m.cpu&&!cpu.includes(m.cpu.toLowerCase()))return false;
+    return true;
+  }
+  if(m.type==='DESKTOP'){
+    if(!mod.includes(m.m))return false;
+    if(m.ff){const ffs=Array.isArray(m.ff)?m.ff:[m.ff];if(!ffs.some(f=>ff.includes(f)))return false;}
+    if(m.cpu&&!cpu.includes(m.cpu.toLowerCase()))return false;
+    return true;
+  }
+  if(m.type==='MONITOR'){
+    if(m.specificModel) return mod.includes(m.specificModel);
+    if(!scrNum) return false;
+    return scrNum===m.sz;
+  }
+  if(m.type==='SSD'){
+    const gb=s=>{const mm=String(s).match(/(\d+)\s*(gb|tb)/i);if(!mm)return String(s).trim();return mm[2].toLowerCase()==='tb'?String(parseInt(mm[1])*1000):mm[1];};
+    return gb(ds)===m.ds||ds===m.ds;
+  }
+  if(m.type==='Laptop-Charger') return m.ck==='usb65'; // all chargers bucket into first row
+  if(m.type==='Monitor Stand')  return it==='monitor stand';
+  if(m.type==='KEYBOARD')       return it.includes('keyboard');
+  if(m.type==='MOUSE')          return it.includes('mouse');
+  if(m.type==='DOCK')           return it==='dock'||it.includes('dock');
+  return false;
+}
+
+function calcPvT(){
+  clearMsg('msg-pvt');
+  if(!S.sold){setMsg('msg-pvt','Upload Sold List first.');return;}
+  const {rows,rowsRaw}=S.sold;
+  const pC=findCol(rows[0]||{},'price');
+
+  // Index-keyed tallies so duplicate labels (e.g. two "5080", two "7060") stay separate
+  const tallies=PVT_MAP.map(()=>({qty:0,total:0}));
+
+  rows.forEach((row,i)=>{
+    const p=toNum(rowsRaw[i][pC]||0);
+    for(let j=0;j<PVT_MAP.length;j++){
+      if(matchPvT(row,PVT_MAP[j])){tallies[j].qty++;tallies[j].total+=p;break;}
+    }
+  });
+
+  // TSV — every row including zeros, exact sheet order
+  // Only two data columns needed: Qty sold | Price sold for
+  const lines=PVT_MAP.map((m,i)=>`${m.label}\t${m.proc}\t${tallies[i].qty}\t${tallies[i].total.toFixed(2)}`);
+  const tsv=lines.join('\n');
+
+  let html=`<div class="sec-hdr" style="color:var(--org)">📈 Paste-Ready Output</div>
+  <p style="font-size:.64rem;color:var(--mut);margin-bottom:8px">Click the textarea → Ctrl+A → Ctrl+C → paste into columns C &amp; D of your Price vs Target sheet. All ${PVT_MAP.length} rows in sheet order, zeros included.</p>
+  <textarea onclick="this.select()" style="width:100%;background:var(--sur);color:var(--txt);border:1px solid var(--bdr2);border-radius:8px;font-family:var(--mono);font-size:.66rem;padding:12px;resize:vertical;min-height:240px;outline:none;line-height:1.85">${tsv}</textarea>
+  <div class="div"></div>
+  <div class="sec-hdr">Non-zero rows only</div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Model</th><th>Processor</th><th>Qty Sold</th><th>Price Sold For</th></tr></thead><tbody>`;
+  PVT_MAP.forEach((m,i)=>{
+    if(!tallies[i].qty)return;
+    html+=`<tr><td>${m.label}</td><td style="color:var(--mut)">${m.proc}</td><td style="color:var(--acc);font-weight:700">${tallies[i].qty}</td><td>${fmt(tallies[i].total)}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('pvt-results').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 3 — PART FINDER + CHINA ORDER
+// ═══════════════════════════════════════════════════════════════
+// Type A/B/C/D/E mapping
+const TYPE_LABELS={
+  'Type A':'Laptop Lid / LCD back cover / top cover',
+  'Type B':'Screen bezel / LCD front cover',
+  'Type C':'Palmrest / C cover / mainboard / keyboard up cover',
+  'Type D':'Base / bottom cover',
+  'Type E':'Back cover / service door cover',
+};
+function getTypeLabel(partType){
+  const t=(partType||'').trim();
+  if(TYPE_LABELS[t])return `${t} — ${TYPE_LABELS[t]}`;
+  return t;
+}
+
+function parseParts(){
+  if(!S.parts)return;
+  const {rows}=S.parts;
+  allParts=[];
+  if(!rows.length)return;
+  const k=Object.keys(rows[0]);
+  // Find columns flexibly
+  const getC=(...hints)=>k.find(c=>hints.some(h=>nn(c).includes(h)))||k[0];
+  const qtyC=getC('qty','quantity');
+  const priceC=getC('price','target');
+  const typeC=getC('part type','type');
+  const modelC=getC('model','make');
+  const pnC=getC('pn','part number','part#');
+  const otherpnC=k.find(c=>nn(c).includes('other')&&nn(c).includes('pn'))||k[5];
+  const genuineC=getC('genuine','oem');
+  const specialC=getC('special','info','note');
+
+  rows.forEach(r=>{
+    const pn=String(r[pnC]||'').trim();
+    const type=String(r[typeC]||'').trim();
+    const model=String(r[modelC]||'').trim();
+    if(!pn||!type)return;
+    allParts.push({
+      qty:r[qtyC]||'',price:r[priceC]||'',
+      type,model,pn,
+      otherpn:String(r[otherpnC]||'').trim(),
+      genuine:String(r[genuineC]||'').trim(),
+      special:String(r[specialC]||'').trim(),
+    });
+  });
+
+  // Populate dropdowns
+  const types=[...new Set(allParts.map(p=>p.type))].filter(Boolean).sort();
+  const sel=document.getElementById('pf-type');
+  sel.innerHTML='<option value="">All types</option>';
+  types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=getTypeLabel(t);sel.appendChild(o);});
+
+  // Extract model numbers from model field
+  const modelNums=[...new Set(allParts.map(p=>{
+    const m=p.model.match(/\b(\d{4})\b/);return m?m[1]:null;
+  }).filter(Boolean))].sort((a,b)=>parseInt(a)-parseInt(b));
+  const mSel=document.getElementById('pf-model-filter');
+  mSel.innerHTML='<option value="">All models</option>';
+  modelNums.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;mSel.appendChild(o);});
+
+  searchParts();
+}
+
+function searchParts(){
+  if(!allParts.length){document.getElementById('pf-results').innerHTML='<div class="empty"><div>🔩</div>Upload Part Numbers sheet</div>';return;}
+  const q=nn(document.getElementById('pf-q').value);
+  const type=document.getElementById('pf-type').value;
+  const modelNum=document.getElementById('pf-model-filter').value;
+
+  const results=allParts.filter(p=>{
+    if(type&&p.type!==type)return false;
+    if(modelNum){
+      // Match model number anywhere in model or pn field
+      if(!p.model.includes(modelNum)&&!p.pn.includes(modelNum)&&!p.otherpn.includes(modelNum))return false;
+    }
+    if(!q)return true;
+    // Match against model number keywords too (e.g. "7400")
+    const combined=[p.pn,p.otherpn,p.type,p.model,p.genuine,p.special].join(' ');
+    return nn(combined).includes(q);
+  }).slice(0,60);
+
+  if(!results.length){document.getElementById('pf-results').innerHTML='<div class="empty"><div>🔍</div>No results</div>';return;}
+  let html='<div class="pf-results-grid">';
+  results.forEach(p=>{
+    const inCart=hhtCart.some(c=>c.pn===p.pn);
+    html+=`<div class="pf-card ${inCart?'sel':''}" onclick='addToCart(${JSON.stringify(p)})'>
+      <div class="pf-pn">${p.pn}${p.otherpn?` <span style="color:var(--mut);font-size:.7rem">/ ${p.otherpn}</span>`:''}
+        ${inCart?'<span class="badge b-grn">In cart</span>':''}
+      </div>
+      <div class="pf-model">${p.model||'—'}</div>
+      <div class="pf-type"><span class="badge b-prp">${getTypeLabel(p.type)}</span>${p.genuine?`<span class="badge b-grn">${p.genuine}</span>`:''}</div>
+    </div>`;
+  });
+  html+='</div>';
+  if(results.length===60)html+=`<div style="font-size:.62rem;color:var(--mut);margin-top:6px;text-align:center">Showing first 60 — refine your search</div>`;
+  document.getElementById('pf-results').innerHTML=html;
+}
+
+function addToCart(p){
+  if(hhtCart.some(c=>c.pn===p.pn))return;
+  hhtCart.push({...p,qty:1});
+  renderCart();searchParts();
+}
+function removeFromCart(pn){const i=hhtCart.findIndex(c=>c.pn===pn);if(i>=0)hhtCart.splice(i,1);renderCart();searchParts();}
+
+function renderCart(){
+  if(!hhtCart.length){
+    document.getElementById('hht-cart-wrap').innerHTML='<div class="empty"><div>🛒</div>Click parts to add to cart</div>';
+    document.getElementById('hht-actions').style.display='none';return;
+  }
+  let html='<div class="card">';
+  hhtCart.forEach((item,i)=>{
+    html+=`<div class="hht-cart-item">
+      <span><strong style="color:var(--acc)">${item.pn}</strong> <span style="color:var(--mut);font-size:.62rem">${item.model}</span><br>
+        <span class="badge b-prp">${getTypeLabel(item.type)}</span>
+      </span>
+      <input class="qty-inp" type="number" min="1" value="${item.qty}" onchange="hhtCart[${i}].qty=parseInt(this.value)||1" title="Quantity">
+      <button class="del-btn" onclick="removeFromCart('${item.pn}')" title="Remove">✕</button>
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('hht-cart-wrap').innerHTML=html;
+  document.getElementById('hht-actions').style.display='block';
+}
+
+function downloadHHT(){
+  const wb=XLSX.utils.book_new();
+  const header=['Quantity:','Target Price (Define Currency):','Part Type','Make/Model:','PN:','other pn','Genuine Original or OEM:','Special Information:','Pictures'];
+  const wsData=[header];
+  hhtCart.forEach(item=>{
+    wsData.push([
+      item.qty,'Dollar',
+      getTypeLabel(item.type),
+      item.model||'',
+      item.pn,
+      item.otherpn||'',
+      item.genuine||'genuine',
+      item.special||'',
+      ''
+    ]);
+  });
+  while(wsData.length<21)wsData.push([null,'Dollar',null,null,null,null,null,null,null]);
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:11},{wch:30},{wch:22},{wch:24},{wch:14},{wch:14},{wch:24},{wch:30},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws,'Sheet1');
+  // Add Terms Used sheet
+  const ws2=XLSX.utils.aoa_to_sheet([[null,null],[null,null],['Type A','Type A – Laptop Lid / LCD back cover / top cover'],['Type B','Type B – is laptop screen bezel / LCD front cover or bezel'],['Type C','Type C – Is laptop palmrest / C cover, mainboard or keyboard up cover'],['Type D','Type D – is laptop base / bottom cover'],['Type E','Type E - is laptop back cover / service door cover']]);
+  XLSX.utils.book_append_sheet(wb,ws2,'Terms Used');
+  const d=new Date();
+  XLSX.writeFile(wb,`${d.getDate().toString().padStart(2,'0')}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getFullYear()}_hht_request.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 4 — COLLECTION ANALYSIS
+// ═══════════════════════════════════════════════════════════════
+const PART_TYPES=['Laptop - Screen','Laptop - Lid','Laptop - Palmrest','Laptop - Bottom Cover','Laptop - Keyboard','Laptop - Screen Bezel','Laptop-Battery','Laptop-Charger','Laptop - Motherboard','SSD'];
+function calcCollection(){
+  clearMsg('msg-ca');
+  const orderQty=parseInt(document.getElementById('ca-qty').value)||0;
+  const cols=['col1','col2','col3'].filter(k=>S[k]);
+  if(!cols.length){setMsg('msg-ca','Upload at least one collection export.');return;}
+  if(!orderQty){setMsg('msg-ca','Enter the order quantity.','warn');return;}
+  const partRates={};
+  cols.forEach(k=>{
+    const rows=S[k].rows;
+    const machines=rows.filter(r=>nn(r['Item Type']||'')==='laptop').length;
+    if(!machines)return;
+    const counts={};
+    rows.forEach(r=>{const it=String(r['Item Type']||'').trim();if(PART_TYPES.includes(it))counts[it]=(counts[it]||0)+1;});
+    PART_TYPES.forEach(pt=>{if(!partRates[pt])partRates[pt]=[];partRates[pt].push({rate:(counts[pt]||0)/machines,count:counts[pt]||0,machines});});
+  });
+  let html=`<div class="sumrow">
+    <div class="sumc"><div class="sumc-lbl">Collections</div><div class="sumc-val" style="color:var(--blu)">${cols.length}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Order Size</div><div class="sumc-val" style="color:var(--acc)">${orderQty}</div></div>
+  </div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Part Type</th>${cols.map((_,i)=>`<th>Col ${i+1} Rate</th>`).join('')}<th>Avg Rate</th><th>Predicted Qty</th></tr></thead><tbody>`;
+  PART_TYPES.forEach(pt=>{
+    const rates=partRates[pt]||[];if(!rates.length)return;
+    const avg=rates.reduce((a,r)=>a+r.rate,0)/rates.length;
+    const pred=Math.ceil(avg*orderQty);
+    html+=`<tr><td>${pt}</td>${rates.map(r=>`<td style="color:var(--mut)">${(r.rate*100).toFixed(1)}% <span style="font-size:.58rem">(${r.count}/${r.machines})</span></td>`).join('')}<td>${(avg*100).toFixed(1)}%</td><td style="color:var(--blu);font-weight:700">${pred}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('ca-results').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 5 — STOCKTAKE
+// ═══════════════════════════════════════════════════════════════
+const SHEET_OWNER={'Boxes + Foam + Packaging':'Nolan','3D Printed Parts + Supplies':'Liam','CPU':'Liam','Cables':'Sonny','Consumables':'Luke','Laptop Keyboards & Bezels':'Jason','Laptop Parts':'Denis/Cameron/Max','New Laptops Small Parts':'Denis','Licenses & Stickers':'Angus','Monitor Stands':'Scott','RAM':'Donnie','SSD + HDD':'Cameron','PC Parts':'Donnie'};
+const DATA_SHEETS=['Boxes + Foam + Packaging','3D Printed Parts + Supplies','Consumables','Cables','Laptop Keyboards & Bezels','Laptop Parts','New Laptops Small Parts','Licenses & Stickers','Monitor Stands','CPU','SSD + HDD','RAM','PC Parts'];
+
+function parseStkData(){
+  if(!S.stk)return;
+  const {wb}=S.stk;
+  stkData={};
+  DATA_SHEETS.forEach(sname=>{
+    if(!wb.SheetNames.includes(sname))return;
+    const ws=wb.Sheets[sname];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true});
+    if(!rows.length)return;
+    const headerRow=rows[0];
+    // Parse date columns
+    const dateCols=[];
+    headerRow.forEach((v,i)=>{
+      if(!v)return;
+      let d=null;
+      if(v instanceof Date)d=v;
+      else if(typeof v==='number'&&v>40000&&v<60000)d=new Date((v-25569)*86400000);
+      if(d){d.setHours(0,0,0,0);dateCols.push({idx:i,date:d,label:d.toISOString().slice(0,10)});}
+    });
+    const items=[];
+    rows.slice(2).forEach(r=>{
+      const name=r[0];
+      if(!name||!String(name).trim()||String(name).trim().length<2)return;
+      const nameStr=String(name).trim();
+      const minQ=r[1];const targetQ=r[2];
+      const weekValues=dateCols.map(dc=>{
+        const v=r[dc.idx];
+        if(v===null||v===undefined||String(v).toLowerCase()==='n/a')return null;
+        const n=parseFloat(v);return isNaN(n)?null:n;
+      });
+      // Skip items where ALL historical data is null (truly empty/unused)
+      const hasAnyData=weekValues.some(v=>v!==null);
+      if(!hasAnyData)return;
+      items.push({name:nameStr,minQ:parseFloat(minQ)||0,targetQ:parseFloat(targetQ)||0,weekValues,dateCols});
+    });
+    stkData[sname]={items,dateCols,owner:SHEET_OWNER[sname]||'?'};
+  });
+
+  // Populate trend dropdowns
+  const sheetSel=document.getElementById('trend-sheet-sel');
+  sheetSel.innerHTML='<option value="">Select sheet…</option>';
+  Object.keys(stkData).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sheetSel.appendChild(o);});
+
+  calcStocktake();
+  calcRunouts();
+}
+
+let selectedWeekIdx=null; // null = latest
+
+function calcStocktake(){
+  clearMsg('msg-stk');
+  if(!stkData){setMsg('msg-stk','Load Stocktake sheet.');return;}
+
+  // Find today's week (next Monday = target)
+  const today=new Date();today.setHours(0,0,0,0);
+  const dow=today.getDay();
+  const thisMonday=new Date(today);thisMonday.setDate(today.getDate()-(dow===0?6:dow-1));
+  const nextMonday=new Date(thisMonday);nextMonday.setDate(thisMonday.getDate()+7);
+
+  // Get all available week dates (from first sheet's dateCols)
+  const firstSheet=Object.values(stkData)[0];
+  const allWeeks=firstSheet?firstSheet.dateCols:[];
+
+  // Find target week column index
+  let targetWeekColIdx=null;
+  allWeeks.forEach((dc,i)=>{
+    if(dc.date.getTime()===nextMonday.getTime())targetWeekColIdx=i;
+    if(targetWeekColIdx===null&&dc.date.getTime()===thisMonday.getTime())targetWeekColIdx=i;
+  });
+  const wIdx=selectedWeekIdx!==null?selectedWeekIdx:(targetWeekColIdx!==null?targetWeekColIdx:allWeeks.length-1);
+
+  // Week selector UI
+  const recentWeeks=allWeeks.slice(Math.max(0,allWeeks.length-12));
+  let wkHtml='<div class="wk-selector">';
+  recentWeeks.forEach((dc,i)=>{
+    const absIdx=allWeeks.length-recentWeeks.length+i;
+    const isTarget=absIdx===wIdx;
+    // Check if any sheet has data for this week
+    let hasSomeData=false;
+    Object.values(stkData).forEach(sh=>{
+      if(sh.items.some(item=>item.weekValues[absIdx]!==null))hasSomeData=true;
+    });
+    const cls=isTarget?'wk-btn active':hasSomeData?'wk-btn filled':'wk-btn missing';
+    wkHtml+=`<button class="${cls}" onclick="selectedWeekIdx=${absIdx};calcStocktake()">${dc.label.slice(5)}</button>`;
+  });
+  wkHtml+='</div>';
+
+  // Who hasn't filled
+  const notFilled=[];
+  const lowItems=[];
+  const sheetResults=[];
+
+  Object.entries(stkData).forEach(([sname,sheet])=>{
+    let filled=0,total=0;
+    const sheetLow=[];
+    sheet.items.forEach(item=>{
+      const val=item.weekValues[wIdx];
+      total++;
+      if(val!==null)filled++;
+      if(val!==null&&item.minQ>0&&val<item.minQ){
+        sheetLow.push({...item,val,short:item.minQ-val});
+      }
+    });
+    const pct=total?Math.round(filled/total*100):0;
+    const complete=pct>=75||total===0;
+    if(!complete&&total>0)notFilled.push({sheet:sname,owner:sheet.owner,filled,total,pct});
+    lowItems.push(...sheetLow);
+    sheetResults.push({sname,owner:sheet.owner,filled,total,pct,complete,lowItems:sheetLow});
+  });
+
+  let html=wkHtml;
+  const selectedLabel=allWeeks[wIdx]?.label||'?';
+  html+=`<div style="font-size:.63rem;color:var(--mut);margin-bottom:12px">Showing week: <strong style="color:var(--txt)">${selectedLabel}</strong></div>`;
+
+  // Missing persons
+  if(notFilled.length){
+    html+=`<div class="missing-banner"><div style="font-family:var(--dis);font-size:.85rem;font-weight:800;color:var(--red);margin-bottom:8px">⚠ Not Filled (${notFilled.length} sheets)</div>`;
+    const byPerson={};
+    notFilled.forEach(n=>n.owner.split('/').forEach(p=>{const nm=p.trim();if(!byPerson[nm])byPerson[nm]=[];byPerson[nm].push(`${n.sname} (${n.pct}%)`)}));
+    Object.entries(byPerson).sort().forEach(([person,sheets])=>{html+=`<span class="missing-name" title="${sheets.join(', ')}">🚫 ${person}</span>`;});
+    html+=`<div style="font-size:.61rem;color:var(--mut);margin-top:8px">Fill by 12 noon Thursday. &lt;75% complete = not filled.</div></div>`;
+  } else {
+    html+=`<div style="background:#0e1f08;border:1px solid var(--adm);border-radius:10px;padding:12px 14px;margin-bottom:14px;color:var(--acc);font-family:var(--dis);font-weight:800">✅ All sheets filled for this week!</div>`;
+  }
+
+  // Low stock
+  if(lowItems.length){
+    html+=`<div class="sec-hdr" style="color:var(--red)">📉 Below Minimum (${lowItems.length})</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Sheet / Owner</th><th>Qty</th><th>Min</th><th>Short</th></tr></thead><tbody>`;
+    lowItems.sort((a,b)=>(a.val-a.minQ)-(b.val-b.minQ)).forEach(li=>{
+      html+=`<tr><td style="color:var(--red)">${li.name}</td><td style="font-size:.6rem;color:var(--mut)">${li.dateCols[0]?.label?li.name:''}<br>${SHEET_OWNER[li.dateCols[0]?.label]||''}</td><td>${li.val}</td><td>${li.minQ}</td><td><span class="badge b-red">−${li.short.toFixed(0)}</span></td></tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  // Sheet completion table
+  html+=`<div class="sec-hdr">Sheet Completion</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sheet</th><th>Owner</th><th>Filled</th><th>Total</th><th>%</th><th>Status</th></tr></thead><tbody>`;
+  sheetResults.forEach(r=>{
+    html+=`<tr class="${r.complete?'dimmed':''}"><td>${r.sname}</td><td>${r.owner}</td><td>${r.filled}</td><td>${r.total}</td><td>${r.pct}%</td><td>${r.complete?'<span class="badge b-grn">✓</span>':'<span class="badge b-red">⚠</span>'}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('stk-results').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB 6 — TRENDS
+// ═══════════════════════════════════════════════════════════════
+function renderTrendItem(){
+  const sheetName=document.getElementById('trend-sheet-sel').value;
+  const itemName=document.getElementById('trend-item-sel').value;
+  if(!sheetName){document.getElementById('trend-results').innerHTML='<div class="empty"><div>📉</div>Select a sheet</div>';return;}
+
+  const sheet=stkData&&stkData[sheetName];
+  if(!sheet){document.getElementById('trend-results').innerHTML='<div class="empty"><div>📉</div>Load stocktake sheet first</div>';return;}
+
+  // Populate item dropdown when sheet changes
+  const itemSel=document.getElementById('trend-item-sel');
+  if(!itemName){
+    itemSel.innerHTML='<option value="">Select item…</option>';
+    sheet.items.forEach(it=>{const o=document.createElement('option');o.value=it.name;o.textContent=it.name;itemSel.appendChild(o);});
+    return;
+  }
+  const item=sheet.items.find(i=>i.name===itemName);
+  if(!item){return;}
+
+  const vals=item.weekValues;
+  const dates=item.dateCols.map(d=>d.label);
+
+  // Get filled data only
+  const filledPairs=vals.map((v,i)=>({v,d:dates[i]})).filter(p=>p.v!==null);
+  if(filledPairs.length<2){document.getElementById('trend-results').innerHTML='<div class="empty"><div>📊</div>Not enough data points</div>';return;}
+
+  // Calc weekly change (avg of last 4 weeks)
+  const recent=filledPairs.slice(-4);
+  let totalChange=0,changeCount=0;
+  for(let i=1;i<recent.length;i++){totalChange+=recent[i].v-recent[i-1].v;changeCount++;}
+  const avgWeeklyChange=changeCount?totalChange/changeCount:0;
+  const lastVal=filledPairs[filledPairs.length-1].v;
+
+  // Runout prediction
+  let runoutWeeks=null,runoutDate=null;
+  if(avgWeeklyChange<0){
+    runoutWeeks=Math.ceil(lastVal/Math.abs(avgWeeklyChange));
+    const rd=new Date();rd.setDate(rd.getDate()+runoutWeeks*7);
+    runoutDate=rd.toISOString().slice(0,10);
+  }
+
+  // Draw canvas chart
+  const canvasId='trend-canvas-'+Date.now();
+  let html=`<div class="trend-canvas-wrap">
+    <div style="font-size:.62rem;color:var(--mut);margin-bottom:8px">${itemName} — qty over time</div>
+    <canvas id="${canvasId}" height="160"></canvas>
+  </div>`;
+
+  html+=`<div class="sumrow">
+    <div class="sumc"><div class="sumc-lbl">Current Qty</div><div class="sumc-val" style="color:var(--acc)">${lastVal}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Avg Weekly Change</div><div class="sumc-val" style="color:${avgWeeklyChange<0?'var(--red)':'var(--blu)'}">${avgWeeklyChange>=0?'+':''}${avgWeeklyChange.toFixed(1)}</div></div>
+    <div class="sumc"><div class="sumc-lbl">Min Quantity</div><div class="sumc-val">${item.minQ}</div></div>
+    ${runoutDate?`<div class="sumc"><div class="sumc-lbl">Predicted Runout</div><div class="sumc-val" style="color:var(--red)">${runoutDate}</div></div>`:''}
+  </div>`;
+
+  if(runoutDate){
+    html+=`<div style="background:#1f0a0a;border:1px solid var(--red);border-radius:9px;padding:11px 14px;font-size:.7rem;color:#ff9ab0;margin-bottom:12px">
+      ⚠ At current depletion rate of ${avgWeeklyChange.toFixed(1)}/week, this item will reach zero in ~${runoutWeeks} weeks (around ${runoutDate}).
+    </div>`;
+  }
+
+  document.getElementById('trend-results').innerHTML=html;
+
+  // Draw chart after DOM update
+  requestAnimationFrame(()=>{
+    const canvas=document.getElementById(canvasId);
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    canvas.width=canvas.offsetWidth*2;canvas.height=320;
+    ctx.scale(2,2);
+    const W=canvas.offsetWidth/2,H=160;
+    const pad={l:40,r:20,t:20,b:30};
+    const dw=W-pad.l-pad.r,dh=H-pad.t-pad.b;
+    const allV=[...filledPairs.map(p=>p.v),item.minQ];
+    const maxV=Math.max(...allV)*1.15,minV=0;
+    const scaleY=v=>pad.t+dh-(v-minV)/(maxV-minV)*dh;
+    const scaleX=i=>pad.l+i/(filledPairs.length-1)*dw;
+    // Background
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--card').trim()||'#181921';
+    ctx.fillRect(0,0,W,H);
+    // Min line
+    ctx.strokeStyle='rgba(255,74,110,.4)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(pad.l,scaleY(item.minQ));ctx.lineTo(W-pad.r,scaleY(item.minQ));ctx.stroke();
+    ctx.setLineDash([]);
+    // Prediction line (extend 4 weeks)
+    if(avgWeeklyChange<0){
+      ctx.strokeStyle='rgba(255,74,110,.5)';ctx.lineWidth=1;ctx.setLineDash([3,5]);
+      const predPairs=[];
+      for(let i=0;i<=4;i++){const pv=lastVal+avgWeeklyChange*i;if(pv<0)break;predPairs.push(pv);}
+      if(predPairs.length>1){
+        ctx.beginPath();
+        predPairs.forEach((pv,i)=>{
+          const x=scaleX(filledPairs.length-1)+i*(dw/(filledPairs.length)*.6);
+          const y=scaleY(pv);
+          i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        });
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+    // Main line
+    const accColor=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#b8ff3c';
+    ctx.strokeStyle=accColor;ctx.lineWidth=2;
+    ctx.beginPath();
+    filledPairs.forEach((p,i)=>{i===0?ctx.moveTo(scaleX(i),scaleY(p.v)):ctx.lineTo(scaleX(i),scaleY(p.v));});
+    ctx.stroke();
+    // Dots
+    filledPairs.forEach((p,i)=>{
+      ctx.fillStyle=accColor;ctx.beginPath();ctx.arc(scaleX(i),scaleY(p.v),3,0,Math.PI*2);ctx.fill();
+    });
+    // Labels
+    ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--mut').trim()||'#52536a';
+    ctx.font='9px IBM Plex Mono';ctx.textAlign='center';
+    [0,Math.floor(filledPairs.length/2),filledPairs.length-1].forEach(i=>{
+      if(filledPairs[i])ctx.fillText(filledPairs[i].d.slice(5),scaleX(i),H-8);
+    });
+    ctx.textAlign='right';
+    [0,.25,.5,.75,1].forEach(f=>{
+      const v=Math.round(minV+(maxV-minV)*f);
+      ctx.fillText(v,pad.l-4,scaleY(v)+3);
+    });
+  });
+}
+
+function calcRunouts(){
+  if(!stkData){document.getElementById('runout-results').innerHTML='<div class="empty"><div>⏱</div>Load Stocktake sheet</div>';return;}
+  const runouts=[];
+  Object.entries(stkData).forEach(([sname,sheet])=>{
+    sheet.items.forEach(item=>{
+      const filled=item.weekValues.filter(v=>v!==null);
+      if(filled.length<3)return;
+      const recent=filled.slice(-4);
+      let tc=0,cc=0;
+      for(let i=1;i<recent.length;i++){tc+=recent[i]-recent[i-1];cc++;}
+      const avgChange=cc?tc/cc:0;
+      const lastVal=filled[filled.length-1];
+      if(avgChange<-0.1&&lastVal>0){
+        const weeks=Math.ceil(lastVal/Math.abs(avgChange));
+        if(weeks<=12){
+          const rd=new Date();rd.setDate(rd.getDate()+weeks*7);
+          runouts.push({name:item.name,sheet:sname,owner:sheet.owner,current:lastVal,change:avgChange,weeks,date:rd.toISOString().slice(0,10),minQ:item.minQ});
+        }
+      }
+    });
+  });
+  if(!runouts.length){document.getElementById('runout-results').innerHTML='<div style="color:var(--acc);font-size:.75rem">✓ No items predicted to run out within 12 weeks.</div>';return;}
+  runouts.sort((a,b)=>a.weeks-b.weeks);
+  let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Item</th><th>Sheet</th><th>Owner</th><th>Current</th><th>Weekly Δ</th><th>Runs out in</th><th>Date</th></tr></thead><tbody>`;
+  runouts.forEach(r=>{
+    const urgent=r.weeks<=3;
+    html+=`<tr><td style="color:${urgent?'var(--red)':'var(--org)'}">${r.name}</td>
+      <td style="font-size:.6rem;color:var(--mut)">${r.sheet}</td>
+      <td>${r.owner}</td><td>${r.current}</td>
+      <td style="color:var(--red)">${r.change.toFixed(1)}/wk</td>
+      <td><span class="badge ${urgent?'b-red':'b-org'}">${r.weeks}wk</span></td>
+      <td style="font-size:.65rem">${r.date}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  document.getElementById('runout-results').innerHTML=html;
+}
+
+// Sheet change for trend item populator
+document.getElementById('trend-sheet-sel').addEventListener('change',function(){
+  document.getElementById('trend-item-sel').innerHTML='<option value="">Select item…</option>';
+  renderTrendItem();
+});
+document.getElementById('trend-item-sel').addEventListener('change',renderTrendItem);
+
+// ═══════════════════════════════════════════════════════════════
+//  GOOGLE DRIVE INTEGRATION
+//  Uses Google Identity Services (OAuth2) + Drive API v3
+//  User must have a Google Cloud project with Drive API enabled.
+//  Replace CLIENT_ID below with your own OAuth2 Client ID.
+//  Authorised JavaScript origin must include the URL you open
+//  this file from (e.g. file:// won't work — serve locally or
+//  from GitHub Pages / any http/https URL).
+// ═══════════════════════════════════════════════════════════════
+
+// ── CONFIG — Client ID stored in localStorage, never hardcoded ─
+const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+let gdriveToken = null;
+let gdriveReady = false;
+
+function getClientId(){
+  return localStorage.getItem('purestats_gdrive_client_id')||'';
+}
+
+function loadGoogleScripts(cb){
+  if(window.google&&window.google.accounts){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';
+  s.onload=()=>{
+    const p=document.createElement('script');
+    p.src='https://apis.google.com/js/api.js';
+    p.onload=()=>{gapi.load('picker',()=>{gdriveReady=true;cb();});};
+    document.head.appendChild(p);
+  };
+  s.onerror=()=>alert('Could not load Google scripts. Check your internet connection.');
+  document.head.appendChild(s);
+}
+
+function gdriveAuth(){
+  let clientId=getClientId();
+
+  if(!clientId){
+    clientId=prompt(
+      'Paste your Google OAuth2 Client ID below.\n\n' +
+      'Get it from: console.cloud.google.com → Credentials → OAuth 2.0 Client IDs\n\n' +
+      'It will be saved in your browser only — never stored in the HTML file.'
+    );
+    if(!clientId||!clientId.trim()){return;}
+    clientId=clientId.trim();
+    localStorage.setItem('purestats_gdrive_client_id',clientId);
+  }
+
+  const btn=document.getElementById('gdrive-auth-btn');
+  const dot=document.getElementById('gdrive-dot');
+  const status=document.getElementById('gdrive-status');
+  status.textContent='Loading…';
+
+  loadGoogleScripts(()=>{
+    try{
+      const client=google.accounts.oauth2.initTokenClient({
+        client_id:clientId,
+        scope:GDRIVE_SCOPE,
+        callback:(resp)=>{
+          if(resp.error){
+            status.textContent='Auth failed';
+            // Clear stored ID if it was wrong
+            if(resp.error==='idpiframe_initialization_failed'||resp.error==='invalid_client'){
+              localStorage.removeItem('purestats_gdrive_client_id');
+              alert('Client ID looks invalid — it has been cleared. Try again with the correct ID.');
+            }
+            return;
+          }
+          gdriveToken=resp.access_token;
+          btn.classList.add('connected');
+          dot.style.cssText='background:var(--blu);box-shadow:0 0 6px var(--blu)';
+          status.textContent='Drive ✓';
+          ['gdrive-pick-dispatch','gdrive-pick-stk','gdrive-pick-arriving'].forEach(id=>{
+            document.getElementById(id).style.display='inline-flex';
+          });
+        }
+      });
+      client.requestAccessToken();
+    }catch(e){
+      status.textContent='Error';
+      localStorage.removeItem('purestats_gdrive_client_id');
+      alert('Error initialising Google auth: '+e.message+'\n\nYour Client ID has been cleared — try again.');
+    }
+  });
+}
+
+// Long-press or right-click Connect Drive to reset/change Client ID
+document.addEventListener('DOMContentLoaded',()=>{
+  const btn=document.getElementById('gdrive-auth-btn');
+  if(!btn)return;
+  btn.addEventListener('contextmenu',(e)=>{
+    e.preventDefault();
+    if(confirm('Reset saved Google Client ID?')){
+      localStorage.removeItem('purestats_gdrive_client_id');
+      document.getElementById('gdrive-status').textContent='Connect Drive';
+      document.getElementById('gdrive-dot').style.cssText='';
+      btn.classList.remove('connected');
+      ['gdrive-pick-dispatch','gdrive-pick-stk','gdrive-pick-arriving'].forEach(id=>{
+        document.getElementById(id).style.display='none';
+      });
+    }
+  });
+  // Show if already has a saved ID
+  if(getClientId()){
+    document.getElementById('gdrive-status').textContent='Connect Drive (ID saved)';
+  }
+});
+
+// Open Google Drive file picker for a specific sheet key
+function gdrivePick(key){
+  if(!gdriveToken){alert('Connect to Google Drive first.');return;}
+  if(!gdriveReady){alert('Google Picker is still loading, try again in a moment.');return;}
+
+  const labels={
+    dispatch:'Select Dispatch Dashboard (.xlsx)',
+    stk:'Select Weekly Stocktake (.xlsx)',
+    arriving:'Select Arriving Sheet (.xlsx or .csv)',
+  };
+  const dotId={'dispatch':'gd-dot-dispatch','stk':'gd-dot-stk','arriving':'gd-dot-arriving'};
+  const nameId={'dispatch':'gd-fn-dispatch','stk':'gd-fn-stk','arriving':'gd-fn-arriving'};
+
+  const view=new google.picker.View(google.picker.ViewId.DOCS);
+  view.setMimeTypes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/vnd.ms-excel');
+
+  const picker=new google.picker.PickerBuilder()
+    .setTitle(labels[key]||'Select file')
+    .addView(view)
+    .setOAuthToken(gdriveToken)
+    .setCallback((data)=>{
+      if(data.action!==google.picker.Action.PICKED)return;
+      const file=data.docs[0];
+      const fileId=file.id;
+      const fileName=file.name;
+
+      document.getElementById(nameId[key]).textContent='Downloading…';
+
+      // Download file content via Drive API
+      // For xlsx: export as xlsx. For csv: export as csv.
+      const isCsv=fileName.toLowerCase().endsWith('.csv');
+      const isGSheet=file.mimeType==='application/vnd.google-apps.spreadsheet';
+
+      let url;
+      if(isGSheet){
+        // Google Sheet → export as xlsx
+        url=`https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`;
+      } else {
+        // Regular file → download directly
+        url=`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+      }
+
+      fetch(url,{headers:{Authorization:`Bearer ${gdriveToken}`}})
+        .then(r=>{
+          if(!r.ok)throw new Error(`HTTP ${r.status}`);
+          return r.arrayBuffer();
+        })
+        .then(buf=>{
+          // Process exactly like a local file upload
+          const wb=XLSX.read(buf,{type:'array',cellDates:true,dense:false});
+          let sname=wb.SheetNames[0];
+          if(key==='dispatch'){const h=wb.SheetNames.find(n=>/dispatch/i.test(n)&&!/instr/i.test(n));if(h)sname=h;}
+          if(key==='arriving'){const h=wb.SheetNames.find(n=>/arriv/i.test(n));if(h)sname=h;}
+          const ws=wb.Sheets[sname];
+          const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+          const rowsRaw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+          S[key]={rows,rowsRaw,wb,sname,fileName};
+
+          // Update UI
+          const dot=document.getElementById(dotId[key]);
+          dot.style.background='var(--blu)';
+          dot.style.boxShadow='0 0 6px var(--blu)';
+          document.getElementById(nameId[key]).textContent=fileName.slice(0,18);
+          document.getElementById('gdrive-pick-'+key).classList.add('connected');
+
+          // Also mark the manual chip as loaded if it exists
+          const manualChip=document.getElementById('fm-'+key);
+          if(manualChip)manualChip.classList.add('loaded');
+          const manualName=document.getElementById('fn-'+key);
+          if(manualName)manualName.textContent=fileName.slice(0,16);
+
+          // Trigger post-load hooks
+          if(key==='stk')parseStkData();
+          console.log(`[GDrive] Loaded ${key}: ${fileName} → ${rows.length} rows (sheet: ${sname})`);
+        })
+        .catch(err=>{
+          document.getElementById(nameId[key]).textContent='Error';
+          alert(`Failed to download "${fileName}": ${err.message}`);
+          console.error('GDrive download error:',err);
+        });
+    })
+    .build();
+
+  picker.setVisible(true);
+}
+
+</script>
+</body>
+</html>
